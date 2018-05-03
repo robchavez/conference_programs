@@ -120,7 +120,8 @@ STS <- roi('superior temporal sulcus', sans2018) +
   roi('psts', sans2018) -
   roi('superior temporal sulcus \\(psts\\)', sans2018)
 
-precunious <- roi('precunious', sans2018) 
+precuneus <- roi('precuneus', sans2018) +
+  roi('precunious', sans2018) 
 
 PCC <- roi('posterior cingulate', sans2018) +
   roi('pcc', sans2018) - 
