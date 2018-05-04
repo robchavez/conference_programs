@@ -9,6 +9,7 @@ library(dplyr)
 library(ggplot2)
 library(reshape2)
 
+
 # row of single terms
 sans2018 <- readLines("sans2018_fulltext.txt")
 
@@ -242,6 +243,105 @@ ggplot(df, aes(reorder(ROI,-count), count, fill=count)) +
 
 
 
+# Basic sentiment analysis
+
+
+```r
+library(tidytext)
+```
+
+```
+## Warning: package 'tidytext' was built under R version 3.4.4
+```
+
+```r
+library(tokenizers)
+```
+
+```
+## Warning: package 'tokenizers' was built under R version 3.4.4
+```
+
+```r
+library(stringr)
+```
+
+```
+## Warning: package 'stringr' was built under R version 3.4.3
+```
+
+```r
+library(tibble)
+
+# tokenize
+sans2018 <- readLines("sans2018_fulltext.txt")
+```
+
+```
+## Warning in readLines("sans2018_fulltext.txt"): incomplete final line found
+## on 'sans2018_fulltext.txt'
+```
+
+```r
+t_sans2018 <- tokenize_words(sans2018)
+
+tab <- table(t_sans2018[[1]])
+tab <- data.frame(word = names(tab), n = as.numeric(tab))
+tab <- tab %>% arrange(desc(n))
+
+df <- as_tibble(tab)
+
+#apply the stop word 
+stops <- data(stop_words)
+
+df_stop <- df %>%
+  anti_join(stop_words)
+```
+
+```
+## Joining, by = "word"
+```
+
+```
+## Warning: Column `word` joining factor and character vector, coercing into
+## character vector
+```
+
+```r
+# filter out numbers
+df_stop <- df_stop %>% filter(word %in% str_subset(df_stop$word, "\\D")) 
+
+df_stop$word <- as.character(df_stop$word)
+
+# attach sentiments
+bing_word_counts <- df_stop %>%
+  inner_join(get_sentiments("bing"))
+```
+
+```
+## Joining, by = "word"
+```
+
+```r
+# plot top 20 words
+    #wrangle
+bing_word_counts %>%
+  group_by(sentiment) %>%
+  top_n(20, n) %>%
+  ungroup() %>%
+  mutate(word = reorder(word, n)) %>%
+    #plot
+  ggplot(aes(word, n, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_brewer(palette = 'Dark2') +
+  facet_wrap(~sentiment, scales = "free_y") +
+  labs(y = NULL,
+       x = NULL) +
+  theme_minimal() +
+  coord_flip()
+```
+
+![](region_popularity_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 
 
