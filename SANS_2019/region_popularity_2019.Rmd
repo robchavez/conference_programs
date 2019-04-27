@@ -1,0 +1,275 @@
+---
+title: "Popular SANS 2019 Brain Regions"
+author: "Rob Chavez"
+date: "May 2, 2019"
+output:
+  html_document:
+    keep_md: yes
+---
+A *rough* count of number of mentions of brain regions and networks in the SANS 2018 program. 
+
+```{r load, warning=FALSE,message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+
+# row of single terms
+sans2019 <- readLines("C:/Users/rober/Documents/neurodeb/shared/sans2019")
+
+
+# convert all to lower case
+sans2019 <- tolower(sans2019)
+
+
+# define term count function 
+roi <- function(x, data){
+  roi_exists <-  gregexpr(x, data)[[1]][1]
+  if(roi_exists>0){
+    roi_count <- length(gregexpr(x, data)[[1]])
+    return(roi_count)
+  } else {
+    return(0)
+  }
+}
+
+```
+
+### MPFCs
+```{r MPFC}
+MPFC <- roi('medial prefrontal cortex', sans2019) +
+  roi('mpfc', sans2019) +
+  roi('medial pfc', sans2019) + 
+  roi('medial prefrontal cortex \\(mpfc\\)', sans2019) - 
+  roi('vmpfc', sans2019) - 
+  roi('dmpfc', sans2019) -
+  roi('ventral medial prefrontal cortex', sans2019) -
+  roi('dorsal medial prefrontal cortex', sans2019)
+  roi('dorsomedial prefrontal cortex', sans2019) -
+  roi('dorsal mpfc', sans2019) -
+  roi('ventral medial prefrontal cortex', sans2019) -
+  roi('ventromedial prefrontal cortex \\(vmpfc\\)', sans2019) -
+  roi('ventral prefrontal cortex \\(vmpfc\\)', sans2019)
+
+dMPFC <- roi('dmpfc', sans2019) +
+  roi('dorsomedial prefrontal cortex', sans2019) +
+  roi('dorsal mpfc', sans2019) +
+  roi('dorsal medial prefrontal cortex', sans2019) -
+  roi('dorsomedial prefrontal cortex \\(dmpfc\\)', sans2019) -
+  roi('dorsal prefrontal cortex \\(dmpfc\\)', sans2019) 
+  
+vMPFC <- roi('vmpfc', sans2019) +
+  roi('ventromedial prefrontal cortex', sans2019) +
+  roi('ventral mpfc', sans2019) +
+  roi('ventral medial prefrontal cortex', sans2019) -
+  roi('ventromedial prefrontal cortex \\(vmpfc\\)', sans2019) -
+  roi('ventral prefrontal cortex \\(vmpfc\\)', sans2019)
+
+```
+
+### LPFC
+```{r LPFC}
+LPFC <- roi('lateral prefrontal cortex', sans2019) +
+  roi('lateral pfc', sans2019) + 
+  roi('lpfc', sans2019) -
+  roi('lateral prefrontal cortex \\(lpfc\\)', sans2019) -
+  roi('ventrolateral prefrontal cortex', sans2019) -
+  roi('ventral lateral prefrontal cortex', sans2019) -
+  roi('dorsolateral prefrontal cortex', sans2019) -
+  roi('dorsal lateral prefrontal cortex', sans2019) -
+  roi('dlpfc', sans2019) - 
+  roi('vlpfc', sans2019) 
+
+dLPFC <- roi('dorsolateral prefrontal cortex', sans2019) +
+  roi('dorsolateral pfc', sans2019) + 
+  roi('dlpfc', sans2019) -
+  roi('dorsolateral prefrontal cortex \\(dlpfc\\)', sans2019) -
+  roi('dorsolateral pfc \\(dlpfc\\)', sans2019) 
+
+
+vLPFC <- roi('ventrolateral prefrontal cortex', sans2019) +
+  roi('ventrolateral pfc', sans2019) + 
+  roi('vlpfc', sans2019) -
+  roi('ventrolateral prefrontal cortex \\(vlpfc\\)', sans2019) -
+  roi('ventrolateral pfc \\(vlpfc\\)', sans2019) 
+
+
+```
+
+### Other common cortical areas
+```{r}
+ACC <- roi('anterior cingulate cortex', sans2019) +
+  roi('acc ', sans2019) +
+  roi(' acc ', sans2019) -
+  roi('nacc ', sans2019)
+
+OFC <- roi('orbitofrontal', sans2019) +
+  roi('ofc', sans2019) - 
+  roi('orbitofrontal cortex \\(ofc\\)', sans2019)
+
+insula <- roi('insula', sans2019) 
+
+TPJ <- roi('tpj', sans2019) +
+  roi('temporoparietal junction',sans2019) +
+  roi('temporo-parietal junction',sans2019) +
+  roi('temporal-parietal junction',sans2019) +
+  roi('temporal parietal junction',sans2019) -
+  roi('temporoparietal junction \\(tpj\\)',sans2019) -
+  roi('temporo-parietal junction \\(tpj\\)',sans2019) -
+  roi('temporal-parietal junction \\(tpj\\)',sans2019) -
+  roi('temporal parietal junction \\(tpj\\)',sans2019) -
+  roi('temporoparietal junction \\(rtpj\\)',sans2019) -
+  roi('temporo-parietal junction \\(rtpj\\)',sans2019) -
+  roi('temporal-parietal junction \\(rtpj\\)',sans2019) -
+  roi('temporal parietal junction \\(rtpj\\)',sans2019) 
+
+fusiform <- roi('fusiform', sans2019) +
+  roi(' ffa', sans2019)
+
+STS <- roi('superior temporal sulcus', sans2019) +
+  roi(' sts', sans2019) +
+  roi('psts', sans2019) -
+  roi('superior temporal sulcus \\(psts\\)', sans2019)
+
+precuneus <- roi('precuneus', sans2019) +
+  roi('precunious', sans2019) 
+
+PCC <- roi('posterior cingulate', sans2019) +
+  roi('pcc', sans2019) - 
+  roi('posterior cingulate cortex \\(pcc\\)', sans2019) -
+  roi('posterior cingulate \\(pcc\\)', sans2019) -
+  roi('posterior cingulate cortex\\; pcc', sans2019)
+
+IFG <- roi('inferior frontal', sans2019) +
+  roi('ifg', sans2019) -
+  roi('inferior frontal gyrus \\(ifg\\)', sans2019) -
+    roi('inferior frontal gyrus \\(rifg\\)', sans2019) 
+  
+IPL <- roi('inferior parietal', sans2019)
+
+occipital <- roi('occipital', sans2019)
+
+somatosensory <- roi('somatosensory', sans2019)
+
+
+
+midtemporal <- roi('middle temporal', sans2019) +
+  roi('medial temporal', sans2019)
+
+#ITG <- roi('inferior temporal', sans2019)
+
+STG <- roi('superior temporal gyrus', sans2019)
+
+#SMA <- roi('supplementary motor',sans2019)
+
+MFG <- roi('middle frontal gyrus', sans2019) +
+  roi('mfg', sans2019) -
+  roi('middle frontal gyrus \\(mfg\\)', sans2019)
+
+```
+
+### Subcortical and cerebellum
+```{r subcortex}
+# NAcc and ventral striatum together
+NAcc <- roi('nacc',sans2019) +
+  roi('nucleus accumbens',sans2019) +
+  roi('ventral striatum',sans2019) +
+  roi(' vs ',sans2019) -
+  10    # Manually checked. There are 10 uses of vs. without the period for 'versus'.  
+
+amygdala <- roi("amygdala", sans2019)
+
+caudate <- roi('caudate', sans2019)
+
+putamen <- roi('putamen', sans2019)
+
+hippocampus <- roi('hippocampus', sans2019)
+
+thalamus <- roi('thalamus', sans2019)
+
+substantianigra <- roi('substantia nigra', sans2019)
+
+cerebellum <- roi('cerebellum', sans2019)
+
+VTA <- roi('ventral tegmental area', sans2019) +
+  roi('vta', sans2019) -
+  roi('ventral tegmental area \\(vta\\)', sans2019) 
+
+
+
+```
+
+### Networks
+```{r networks}
+default <- roi('default mode', sans2019) +
+  roi('default-mode', sans2019) +
+  roi('default network', sans2019) +
+  roi('dmn', sans2019) -
+  roi('default \\(dmn\\)', sans2019) +
+  roi('mode \\(dmn\\)', sans2019) +
+  roi('network \\(dmn\\)', sans2019)
+
+  
+frontostriatal <- roi('frontostriatal', sans2019)
+
+cingulo_opercular <- roi('cingulo-opercular', sans2019)
+
+cingulo_insular <- roi('cingulo-insular', sans2019)
+
+amygdala_pfc <- roi('amygdala-',sans2019) -
+  roi('amygdala-striatal', sans2019) -
+  roi('amygdala-posterior', sans2019) 
+
+amygdala_striatal <- roi('amygdala-striatal', sans2019) 
+amygdala_hippocampal <- roi('amygdalo-hippocampal', sans2019) 
+
+frontoparietal <- roi('frontoparietal', sans2019)
+
+corpus_callosum <- roi('corpus callosum', sans2019)
+
+```
+
+## Make data frame 
+```{r warning=FALSE} 
+
+# remove variables in global env to make data frame
+rm(sans2019)
+rm(roi)
+
+df <- as.data.frame(as.list(.GlobalEnv))
+
+df <- melt(df, variable.name = 'ROI',value.name = 'count')
+
+```
+
+## plot
+```{r}
+ggplot(df, aes(reorder(ROI,-count), count, fill=count)) +
+         geom_bar(stat = 'identity',color='black') + 
+         geom_hline(yintercept = 0, size=1) +
+         labs(x=NULL, y="count", title="Brain region & network popularity \nin SANS 2019 program") +                   scale_y_continuous(breaks=seq(10,110,10)) +
+         theme_minimal() +
+         scale_fill_gradient(high="darkorchid4", low="gray90" ) +
+         theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7), 
+         legend.position = 'none')
+  
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
