@@ -244,7 +244,7 @@ df <- melt(df, variable.name = 'ROI',value.name = 'count')
 ## plot
 ```{r}
 ggplot(df, aes(reorder(ROI,-count), count, fill=count)) +
-         geom_bar(stat = 'identity',color='black') + 
+         geom_bar(stat = 'identity',color='black', size=.4) + 
          geom_hline(yintercept = 0, size=1) +
          labs(x=NULL, y="count", title="Brain region & network popularity \nin SANS 2019 program") +                   scale_y_continuous(breaks=seq(10,110,10)) +
          theme_minimal() +
